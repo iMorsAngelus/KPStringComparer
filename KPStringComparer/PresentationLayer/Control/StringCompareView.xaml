@@ -1,0 +1,151 @@
+﻿<UserControl x:Class="KPStringComparer.PresentationLayer.Control.StringCompareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c="clr-namespace:CalcBinding;assembly=CalcBinding"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:KPStringComparer.PresentationLayer.Converter"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             mc:Ignorable="d" 
+             x:Shared="False"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" 
+                  DataContext="{Binding InputStrings, 
+                                    UpdateSourceTrigger=PropertyChanged,
+                                    Mode=TwoWay}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Content="String" 
+                   Grid.Column="0"/>
+                <TextBox Height="30" 
+                     Text="{Binding Path = SourceString, 
+                                    UpdateSourceTrigger=PropertyChanged}" 
+                     Grid.Column="1"
+                     Margin="0,0,20,0" />
+                <Label Content="Sub string" 
+                   Grid.Row="1" 
+                   Grid.Column="0" />
+                <TextBox Height="30" 
+                     Text="{Binding Path = SubString,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                     Grid.Row="1" 
+                     Grid.Column="1"
+                     Margin="0,0,20,0" />
+                <ListBox ItemsSource="{Binding MainString, 
+                                               Converter={converters:MainStringConverter}, 
+                                               UpdateSourceTrigger=PropertyChanged}"
+                         SelectedIndex="{Binding CurrentChar}"
+                         Grid.Row="2" 
+                         Grid.ColumnSpan="2" 
+                         BorderThickness="0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource FindAncestor, 
+                                                                                                    AncestorType={x:Type UserControl}}, 
+                                                                     Path=DataContext.SelectionItemChangedCommand}"
+                                                   CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, 
+                                                                              AncestorType={x:Type ListBox}}}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="20" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" 
+                                    BorderThickness="{c:Binding IsBorder? 3 : 0}"
+                                    BorderBrush="Black"
+                                    Width="20" 
+                                    Height="20" >
+                                    <TextBlock Text="{Binding Path = Char}" 
+                                           TextAlignment="Center" 
+                                           VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Grid.Row="1"
+                                       Text="{Binding Path = Prefix}" 
+                                       TextAlignment="Center" 
+                                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+            <Label Grid.Column="1"
+               Content="Playback speed:"
+               Height="30"
+               Margin="0,5,0,0" 
+               VerticalAlignment="Top"
+               HorizontalAlignment="Left"/>
+            <xctk:IntegerUpDown Grid.Column="1"
+                            Width="50"
+                            Height="30"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Right"
+                            Margin="0,5,0,0"
+                            Text="{Binding Path=PlayBackSpeed, 
+                                           Mode=TwoWay, 
+                                           UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Grid.Column="1"
+                Width="80"
+                Height="30"
+                Content="KMP search"
+                Margin="0,40,0,0" 
+                VerticalAlignment="Top"
+                Command="{Binding Path=KmpClickCommand}"/>
+            <Button Grid.Column="1"
+                Width="80"
+                Height="30"
+                Content="BM search"
+                Margin="0,75,0,0" 
+                VerticalAlignment="Top"
+                Command="{Binding Path=BmClickCommand}"/>
+        </Grid>
+        <StackPanel DataContext="{Binding InputStrings}"
+                    Grid.Row="1">
+            <Label HorizontalAlignment="Center"
+                   Content="Number of occurrence:"/>
+            <Label HorizontalAlignment="Center"
+                   Content="{Binding NumberOfOccurrences}"/>
+        </StackPanel>
+        <Grid Visibility="{Binding IsProgressBarVisible}"
+              Grid.Row="2">
+            <Grid DataContext="{Binding InputStrings}">
+                <ProgressBar Maximum="{Binding MaximumProgressBar}"
+                             Value="{Binding CurrentStep}"
+                             VerticalAlignment="Bottom"
+                             Height="25"/>
+                <Label Content="{Binding PrecentProgressBar}"
+                       Height="25"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Bottom" />
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
